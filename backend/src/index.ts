@@ -43,6 +43,28 @@ app.get('/api/fees', (_req, res) => {
   });
 });
 
+// Debug: inspect wallet UTXO state
+app.get('/api/debug/wallet/:walletId', async (_req, res) => {
+  try {
+    const { walletForID } = require('@railgun-community/wallet');
+    const { TXIDVersion } = require('@railgun-community/shared-models');
+    const { NETWORK } = require('./config/constants');
+    const wallet = walletForID(_req.params.walletId);
+    const balances = wallet.balances?.[TXIDVersion.V2_PoseidonMerkle]?.[NETWORK];
+    const utxos = wallet.utxos?.[TXIDVersion.V2_PoseidonMerkle]?.[NETWORK];
+    res.json({
+      id: wallet.id,
+      hasBalances: !!balances,
+      balanceKeys: balances ? Object.keys(balances) : [],
+      balances: balances ?? {},
+      hasUtxos: !!utxos,
+      utxoCount: utxos ? Object.keys(utxos).length : 0,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Health check
 app.get('/api/health', async (_req, res) => {
   try {

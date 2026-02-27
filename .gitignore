@@ -1,2 +1,37 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.next/
+
+# Environment files (secrets)
+*.env
+.env
+.env.local
+.env.production
+
+# Railgun SDK internal storage
+engine.db/
+artifacts/
+
+# IDE / Editor
 .cursor
+.vscode
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Project docs (local only)
 memory-bank
+
+# Logs
+*.log
+npm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+
+# Coverage
+coverage/

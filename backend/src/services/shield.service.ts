@@ -8,6 +8,7 @@ import {
   EVMGasType,
   type RailgunERC20AmountRecipient,
 } from '@railgun-community/shared-models';
+import { keccak256 } from 'ethers';
 import { NETWORK } from '../config/constants';
 
 /**
@@ -20,20 +21,31 @@ export function getShieldSignatureMessage(): string {
 }
 
 /**
+ * Derives a 32-byte shield private key from a MetaMask signature.
+ * The SDK expects exactly 32 bytes for the Ed25519 scalar derivation,
+ * but MetaMask signatures are 65 bytes (r + s + v). Hashing with
+ * keccak256 produces the required 32-byte key deterministically.
+ */
+function deriveShieldKey(signature: string): string {
+  return keccak256(signature);
+}
+
+/**
  * Populates a shield transaction for BNB.
  * The user wraps BNB -> WBNB and deposits into the Railgun contract.
  * Returns a populated tx that the frontend sends to MetaMask for signing.
  *
  * @param railgunAddress - The 0zk address receiving shielded tokens
- * @param shieldPrivateKey - Signature from signing the shield message
+ * @param signedMessage - Raw 65-byte MetaMask signature (hashed to 32 bytes internally)
  * @param amountWei - Amount in wei
  */
 export async function populateShieldBNB(
   railgunAddress: string,
-  shieldPrivateKey: string,
+  signedMessage: string,
   amountWei: bigint,
 ): Promise<{ to: string; data: string; value?: bigint }> {
   const { wrappedAddress } = NETWORK_CONFIG[NETWORK].baseToken;
+  const shieldPrivateKey = deriveShieldKey(signedMessage);
 
   const wrappedERC20Amount: RailgunERC20AmountRecipient = {
     tokenAddress: wrappedAddress,
