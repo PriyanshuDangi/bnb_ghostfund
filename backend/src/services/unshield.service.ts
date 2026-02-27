@@ -39,7 +39,10 @@ export async function unshieldBNB(
 
   const sendWithPublicWallet = true;
   const feeBlock = await provider.getBlock('latest');
-  const gasPrice = feeBlock?.baseFeePerGas ?? 10_000_000_000n;
+  const MIN_GAS_PRICE = 3_000_000_000n; // 3 gwei — BSC testnet minimum
+  const gasPrice = (feeBlock?.baseFeePerGas && feeBlock.baseFeePerGas > 0n)
+    ? feeBlock.baseFeePerGas
+    : MIN_GAS_PRICE;
 
   // 1. Gas estimate
   const originalGasDetails = {
