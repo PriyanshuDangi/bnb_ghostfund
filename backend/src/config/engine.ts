@@ -3,8 +3,6 @@ import {
   stopRailgunEngine,
   loadProvider,
   getProver,
-  createRailgunWallet,
-  refreshBalances,
   setOnUTXOMerkletreeScanCallback,
   setOnBalanceUpdateCallback,
   setLoggers,
@@ -22,13 +20,10 @@ import { createArtifactStore } from './artifacts';
 import {
   NETWORK,
   BSC_TESTNET_RPC,
-  PPOI_AGGREGATOR_URL,
   RAILGUN_PROXY,
   RAILGUN_RELAY_ADAPT,
   RAILGUN_WBNB,
   DEPLOYMENT_BLOCK,
-  RAILGUN_MNEMONIC,
-  RAILGUN_ENCRYPTION_KEY,
 } from './constants';
 
 /**
@@ -151,26 +146,7 @@ export async function initializeRailgunEngine(): Promise<void> {
   );
 
   console.log('[Engine] Railgun fees:', feesSerialized);
-
-  // Pre-load the 0zk wallet so it survives server restarts.
-  // createRailgunWallet is idempotent — same mnemonic always yields the same wallet ID.
-  console.log('[Engine] Loading 0zk wallet from mnemonic...');
-  const walletInfo = await createRailgunWallet(
-    RAILGUN_ENCRYPTION_KEY,
-    RAILGUN_MNEMONIC,
-    {},
-  );
-  if (walletInfo) {
-    console.log(`[Engine] 0zk wallet ready: ${walletInfo.id.substring(0, 16)}...`);
-
-    // Incremental scan — picks up new events since last sync without
-    // clearing cached Merkle tree state (non-destructive on restart).
-    const { chain } = NETWORK_CONFIG[NETWORK];
-    refreshBalances(chain, [walletInfo.id]).catch(() => {});
-    console.log('[Engine] Background balance refresh started.');
-  }
-
-  console.log('[Engine] Initialization complete.');
+  console.log('[Engine] Initialization complete. Wallets are created on-demand via API.');
 
   process.on('SIGINT', async () => {
     console.log('[Engine] Shutting down...');

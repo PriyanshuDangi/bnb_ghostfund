@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { getBalance, type BalanceResponse } from '@/lib/api';
+import { createWallet, getBalance, type BalanceResponse } from '@/lib/api';
 
 export default function StatusPage() {
   const [walletInfo, setWalletInfo] = useState<{
@@ -16,7 +16,12 @@ export default function StatusPage() {
     const stored = localStorage.getItem('ghostfund_wallet');
     if (stored) {
       try {
-        setWalletInfo(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        setWalletInfo(parsed);
+        // Re-register wallet on the backend (handles backend restarts)
+        if (parsed.mnemonic) {
+          createWallet(parsed.mnemonic).catch(() => {});
+        }
       } catch {
         // ignore
       }

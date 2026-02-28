@@ -21,8 +21,8 @@ export const DEPLOYMENT_BLOCK = parseInt(process.env.DEPLOYMENT_BLOCK || '0');
 // Relayer wallet (funded with tBNB)
 export const RELAYER_PRIVATE_KEY = requireEnv('RELAYER_PRIVATE_KEY');
 
-// Railgun 0zk wallet credentials
-export const RAILGUN_MNEMONIC = requireEnv('RAILGUN_MNEMONIC');
+// Railgun 0zk wallet credentials (mnemonic is optional — wallets created per-user via API)
+export const RAILGUN_MNEMONIC = process.env.RAILGUN_MNEMONIC || '';
 export const RAILGUN_ENCRYPTION_KEY = requireEnv('RAILGUN_ENCRYPTION_KEY');
 
 // Engine storage

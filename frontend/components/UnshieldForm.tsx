@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { parseEther } from 'viem';
-import { requestUnshield, getFees, type FeesResponse } from '@/lib/api';
+import { createWallet, requestUnshield, getFees, type FeesResponse } from '@/lib/api';
 import { TxStatus } from './TxStatus';
 
 export function UnshieldForm() {
@@ -24,6 +24,10 @@ export function UnshieldForm() {
       try {
         const parsed = JSON.parse(stored);
         setWalletId(parsed.id);
+        // Re-register wallet on the backend (handles backend restarts)
+        if (parsed.mnemonic) {
+          createWallet(parsed.mnemonic).catch(() => {});
+        }
       } catch {
         // ignore
       }

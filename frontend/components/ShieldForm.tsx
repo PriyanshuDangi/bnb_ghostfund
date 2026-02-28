@@ -8,6 +8,7 @@ import {
   useSignMessage,
 } from 'wagmi';
 import { parseEther } from 'viem';
+import { english, generateMnemonic } from 'viem/accounts';
 import {
   createWallet,
   populateShield,
@@ -40,7 +41,12 @@ export function ShieldForm() {
     const stored = localStorage.getItem('ghostfund_wallet');
     if (stored) {
       try {
-        setWalletInfo(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        setWalletInfo(parsed);
+        // Re-register wallet on the backend (handles backend restarts)
+        if (parsed.mnemonic) {
+          createWallet(parsed.mnemonic).catch(() => {});
+        }
       } catch {
         localStorage.removeItem('ghostfund_wallet');
       }
@@ -51,12 +57,12 @@ export function ShieldForm() {
     if (walletInfo) return walletInfo;
 
     try {
-      const mnemonic =
-        'test test test test test test test test test test test junk';
+      const mnemonic = generateMnemonic(english);
       const wallet = await createWallet(mnemonic);
-      localStorage.setItem('ghostfund_wallet', JSON.stringify(wallet));
-      setWalletInfo(wallet);
-      return wallet;
+      const fullWallet = { ...wallet, mnemonic };
+      localStorage.setItem('ghostfund_wallet', JSON.stringify(fullWallet));
+      setWalletInfo(fullWallet);
+      return fullWallet;
     } catch (err: any) {
       setError(err.message);
       return null;
