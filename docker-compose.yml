@@ -5,17 +5,20 @@ services:
       - "3001:3001"
     env_file:
       - ./backend/.env
+    environment:
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
     volumes:
       - engine-data:/app/engine.db
       - artifacts-data:/app/artifacts
     restart: unless-stopped
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3001/api}
     ports:
       - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:3001/api
     depends_on:
       - backend
     restart: unless-stopped

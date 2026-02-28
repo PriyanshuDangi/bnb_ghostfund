@@ -4,7 +4,7 @@ import {
   loadProvider,
   getProver,
   createRailgunWallet,
-  rescanFullUTXOMerkletreesAndWallets,
+  refreshBalances,
   setOnUTXOMerkletreeScanCallback,
   setOnBalanceUpdateCallback,
   setLoggers,
@@ -129,8 +129,8 @@ export async function initializeRailgunEngine(): Promise<void> {
   getProver().setSnarkJSGroth16(groth16 as any);
 
   console.log('[Engine] Loading BSC testnet provider...');
-  // SDK requires total provider weight >= 2 for fallback quorum.
-  // maxLogsPerBatch controls how many blocks the scanner queries per RPC call.
+  // Single provider with weight >= 2 for fallback quorum.
+  // maxLogsPerBatch: 1 minimizes per-request load to avoid RPC rate limits.
   const providerConfig: FallbackProviderJsonConfig = {
     chainId: 97,
     providers: [
@@ -138,8 +138,8 @@ export async function initializeRailgunEngine(): Promise<void> {
         provider: BSC_TESTNET_RPC,
         priority: 1,
         weight: 2,
-        maxLogsPerBatch: 10,
-        stallTimeout: 10_000,
+        maxLogsPerBatch: 1,
+        stallTimeout: 15_000,
       },
     ],
   };
@@ -163,11 +163,11 @@ export async function initializeRailgunEngine(): Promise<void> {
   if (walletInfo) {
     console.log(`[Engine] 0zk wallet ready: ${walletInfo.id.substring(0, 16)}...`);
 
-    // Kick off a full Merkle tree rescan in the background to pick up
-    // any shield events that occurred while the server was down.
+    // Incremental scan — picks up new events since last sync without
+    // clearing cached Merkle tree state (non-destructive on restart).
     const { chain } = NETWORK_CONFIG[NETWORK];
-    rescanFullUTXOMerkletreesAndWallets(chain, [walletInfo.id]).catch(() => {});
-    console.log('[Engine] Background Merkle tree rescan started.');
+    refreshBalances(chain, [walletInfo.id]).catch(() => {});
+    console.log('[Engine] Background balance refresh started.');
   }
 
   console.log('[Engine] Initialization complete.');
