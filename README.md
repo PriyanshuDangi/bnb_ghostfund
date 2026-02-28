@@ -67,7 +67,7 @@ Deployer / Relayer: [`0x117A3E11a93B2C88713bd35bE47FaFb81E4461C5`](https://testn
 ### Docker (one command)
 
 ```bash
-git clone https://github.com/priyanshu-dangi/ghostfund.git && cd ghostfund
+git clone https://github.com/PriyanshuDangi/bnb_ghostfund.git.git && cd ghostfund
 cp .env.example backend/.env
 # Edit backend/.env — add your RELAYER_PRIVATE_KEY
 docker-compose up --build

@@ -235,7 +235,7 @@ bnb_ghostfund/
 
 ```bash
 # Clone the repository
-git clone https://github.com/priyanshu-dangi/ghostfund.git
+git clone https://github.com/PriyanshuDangi/bnb_ghostfund.git.git
 cd ghostfund
 
 # Configure environment
