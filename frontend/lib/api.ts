@@ -102,6 +102,22 @@ export interface FeesResponse {
   railgunUnshieldFeePercent: string;
   totalApproxPercent: string;
   token: string;
+  ghostPaymaster: string | null;
+}
+
+// GhostPaymaster
+export interface PaymasterResponse {
+  address: string;
+  relayer: string;
+  owner: string;
+  feeBasisPoints: number;
+  feePercent: string;
+  poolBalanceWei: string;
+  poolBalanceBNB: string;
+}
+
+export function getPaymasterInfo(): Promise<PaymasterResponse> {
+  return request('/paymaster');
 }
 
 export function getFees(): Promise<FeesResponse> {

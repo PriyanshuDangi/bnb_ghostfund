@@ -14,6 +14,7 @@ import {
   RAILGUN_WBNB,
 } from '../config/constants';
 import { getRelayerWallet, getProvider } from './relayer.service';
+import { claimGasReimbursement, isPaymasterConfigured } from './paymaster.service';
 
 /**
  * Full unshield flow:
@@ -116,6 +117,14 @@ export async function unshieldBNB(
   console.log(`[Unshield] Tx submitted: ${tx.hash}`);
   const receipt = await tx.wait();
   console.log(`[Unshield] Tx confirmed in block ${receipt?.blockNumber}`);
+
+  // Claim gas reimbursement from GhostPaymaster (non-blocking, best-effort)
+  if (isPaymasterConfigured() && receipt) {
+    const actualGasUsed = receipt.gasUsed;
+    claimGasReimbursement(actualGasUsed, gasPrice).catch((err) => {
+      console.warn('[Unshield] Paymaster reimbursement skipped:', err.message);
+    });
+  }
 
   return tx.hash;
 }

@@ -1,4 +1,4 @@
-import { JsonRpcProvider, Wallet } from 'ethers';
+import { JsonRpcProvider, Wallet, FetchRequest } from 'ethers';
 import { BSC_TESTNET_RPC, RELAYER_PRIVATE_KEY } from '../config/constants';
 
 let provider: JsonRpcProvider;
@@ -6,10 +6,17 @@ let relayerWallet: Wallet;
 
 /**
  * Returns a singleton JsonRpcProvider for BSC testnet.
+ * Uses a 120s timeout — gas estimation for ZK unshield txs involves
+ * heavy eth_call simulations that can exceed default timeouts on public RPCs.
  */
 export function getProvider(): JsonRpcProvider {
   if (!provider) {
-    provider = new JsonRpcProvider(BSC_TESTNET_RPC);
+    const fetchReq = new FetchRequest(BSC_TESTNET_RPC);
+    fetchReq.timeout = 120_000;
+    provider = new JsonRpcProvider(fetchReq, undefined, {
+      staticNetwork: true,
+      batchMaxCount: 1,
+    });
   }
   return provider;
 }

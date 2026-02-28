@@ -20,6 +20,7 @@ import { createArtifactStore } from './artifacts';
 import {
   NETWORK,
   BSC_TESTNET_RPC,
+  BSC_TESTNET_RPC_FALLBACK,
   RAILGUN_PROXY,
   RAILGUN_RELAY_ADAPT,
   RAILGUN_WBNB,
@@ -124,25 +125,34 @@ export async function initializeRailgunEngine(): Promise<void> {
   getProver().setSnarkJSGroth16(groth16 as any);
 
   console.log('[Engine] Loading BSC testnet provider...');
-  // Single provider with weight >= 2 for fallback quorum.
-  // maxLogsPerBatch: 1 minimizes per-request load to avoid RPC rate limits.
+  const providers: FallbackProviderJsonConfig['providers'] = [
+    {
+      provider: BSC_TESTNET_RPC,
+      priority: 1,
+      weight: 2,
+      maxLogsPerBatch: 10,
+      stallTimeout: 60_000,
+    },
+  ];
+  if (BSC_TESTNET_RPC_FALLBACK) {
+    providers.push({
+      provider: BSC_TESTNET_RPC_FALLBACK,
+      priority: 2,
+      weight: 1,
+      maxLogsPerBatch: 1,
+      stallTimeout: 60_000,
+    });
+    console.log('[Engine] Fallback RPC configured');
+  }
   const providerConfig: FallbackProviderJsonConfig = {
     chainId: 97,
-    providers: [
-      {
-        provider: BSC_TESTNET_RPC,
-        priority: 1,
-        weight: 2,
-        maxLogsPerBatch: 1,
-        stallTimeout: 15_000,
-      },
-    ],
+    providers,
   };
 
   const { feesSerialized } = await loadProvider(
     providerConfig,
     NETWORK,
-    60_000,
+    120_000,
   );
 
   console.log('[Engine] Railgun fees:', feesSerialized);

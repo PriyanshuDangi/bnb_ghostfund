@@ -1,11 +1,12 @@
 import express from 'express';
 import cors from 'cors';
-import { PORT, RELAYER_FEE_BASIS_POINTS } from './config/constants';
+import { PORT, RELAYER_FEE_BASIS_POINTS, GHOST_PAYMASTER } from './config/constants';
 import { initializeRailgunEngine } from './config/engine';
 import { walletRouter } from './routes/wallet.routes';
 import { shieldRouter } from './routes/shield.routes';
 import { unshieldRouter } from './routes/unshield.routes';
 import { statusRouter } from './routes/status.routes';
+import { paymasterRouter } from './routes/paymaster.routes';
 import { getRelayerWallet } from './services/relayer.service';
 
 // BigInt JSON serialization — Express cannot serialize BigInt natively
@@ -30,6 +31,7 @@ app.use('/api/wallet', walletRouter);
 app.use('/api/shield', shieldRouter);
 app.use('/api/unshield', unshieldRouter);
 app.use('/api/status', statusRouter);
+app.use('/api/paymaster', paymasterRouter);
 
 // Fee info endpoint
 app.get('/api/fees', (_req, res) => {
@@ -40,6 +42,7 @@ app.get('/api/fees', (_req, res) => {
     railgunUnshieldFeePercent: '0.25%',
     totalApproxPercent: '0.8%',
     token: 'BNB',
+    ghostPaymaster: GHOST_PAYMASTER || null,
   });
 });
 

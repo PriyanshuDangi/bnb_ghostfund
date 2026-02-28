@@ -2,7 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { parseEther } from 'viem';
-import { createWallet, requestUnshield, getFees, type FeesResponse } from '@/lib/api';
+import {
+  createWallet,
+  requestUnshield,
+  getFees,
+  getPaymasterInfo,
+  type FeesResponse,
+  type PaymasterResponse,
+} from '@/lib/api';
 import { TxStatus } from './TxStatus';
 
 export function UnshieldForm() {
@@ -16,6 +23,7 @@ export function UnshieldForm() {
     bscscanUrl: string;
   } | null>(null);
   const [fees, setFees] = useState<FeesResponse | null>(null);
+  const [paymaster, setPaymaster] = useState<PaymasterResponse | null>(null);
   const [walletId, setWalletId] = useState('');
 
   useEffect(() => {
@@ -34,6 +42,7 @@ export function UnshieldForm() {
     }
 
     getFees().then(setFees).catch(() => {});
+    getPaymasterInfo().then(setPaymaster).catch(() => {});
   }, []);
 
   async function handleUnshield() {
@@ -140,6 +149,38 @@ export function UnshieldForm() {
           <p className="text-xs text-gray-500">
             Gas is paid by the GhostFund relayer — destination needs zero BNB
           </p>
+        </div>
+      )}
+
+      {paymaster && (
+        <div className="rounded-xl bg-gray-800/30 border border-ghost-500/20 p-4 space-y-2">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="h-2 w-2 rounded-full bg-ghost-400 animate-pulse" />
+            <span className="text-xs font-semibold text-ghost-400 uppercase tracking-wider">
+              GhostPaymaster
+            </span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-400">Contract</span>
+            <a
+              href={`https://testnet.bscscan.com/address/${paymaster.address}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-ghost-400 hover:text-ghost-300 font-mono text-xs"
+            >
+              {paymaster.address.slice(0, 6)}...{paymaster.address.slice(-4)}
+            </a>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-400">On-chain fee rate</span>
+            <span className="text-gray-200">{paymaster.feePercent}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-400">Gas reimbursement pool</span>
+            <span className="text-gray-200">
+              {parseFloat(paymaster.poolBalanceBNB).toFixed(4)} BNB
+            </span>
+          </div>
         </div>
       )}
 

@@ -9,8 +9,9 @@ function requireEnv(name: string): string {
   return val;
 }
 
-// BSC Testnet RPC
+// BSC Testnet RPC (primary + optional fallback)
 export const BSC_TESTNET_RPC = requireEnv('BSC_TESTNET_RPC');
+export const BSC_TESTNET_RPC_FALLBACK = process.env.BSC_TESTNET_RPC_FALLBACK || '';
 
 // Railgun contract addresses (deployed in Phase 1)
 export const RAILGUN_PROXY = requireEnv('RAILGUN_PROXY');
@@ -20,6 +21,9 @@ export const DEPLOYMENT_BLOCK = parseInt(process.env.DEPLOYMENT_BLOCK || '0');
 
 // Relayer wallet (funded with tBNB)
 export const RELAYER_PRIVATE_KEY = requireEnv('RELAYER_PRIVATE_KEY');
+
+// GhostPaymaster contract (on-chain gas reimbursement)
+export const GHOST_PAYMASTER = process.env.GHOST_PAYMASTER || '';
 
 // Railgun 0zk wallet credentials (mnemonic is optional — wallets created per-user via API)
 export const RAILGUN_MNEMONIC = process.env.RAILGUN_MNEMONIC || '';

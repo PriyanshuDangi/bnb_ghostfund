@@ -166,6 +166,36 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Deployed Contracts */}
+      <section className="mb-20">
+        <h2 className="text-3xl font-bold text-center mb-10">
+          Deployed Contracts
+        </h2>
+        <div className="card max-w-3xl mx-auto font-mono text-xs space-y-3">
+          {[
+            { name: 'RailgunProxy', addr: '0x5e0d11D4Ba0B606c4dd19eAbce2d43daFCE6b7c0' },
+            { name: 'RelayAdapt', addr: '0x254798830B89f716E66D2F77b611320883a7A52C' },
+            { name: 'WBNB', addr: '0xAc21F2a5fA4297bE7E150Dd8133BcaDe04979033' },
+            { name: 'GhostPaymaster', addr: '0x77aDC78a0dfE3A7622149b93977cEe68343eefcF' },
+          ].map(({ name, addr }) => (
+            <div key={addr} className="flex items-center justify-between gap-4">
+              <span className="text-gray-400 text-sm font-sans">{name}</span>
+              <a
+                href={`https://testnet.bscscan.com/address/${addr}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-ghost-400 hover:text-ghost-300 truncate"
+              >
+                {addr}
+              </a>
+            </div>
+          ))}
+          <p className="text-gray-600 text-xs font-sans pt-2 border-t border-gray-800">
+            BSC Testnet (Chain ID 97)
+          </p>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="text-center">
         <div className="card max-w-2xl mx-auto">
