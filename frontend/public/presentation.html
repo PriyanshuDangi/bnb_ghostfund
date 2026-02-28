@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GhostFund — Privacy Gas Relayer for BNB Chain</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* ===========================================
+           CSS CUSTOM PROPERTIES (THEME)
+           =========================================== */
+        :root {
+            /* BNB Chain Colors */
+            --bnb-yellow: #F0B90B;
+            --bnb-yellow-glow: rgba(240, 185, 11, 0.3);
+            --bnb-yellow-dim: rgba(240, 185, 11, 0.08);
+
+            /* Backgrounds */
+            --bg-primary: #060609;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --bg-card-hover: rgba(255, 255, 255, 0.06);
+            --border-subtle: rgba(240, 185, 11, 0.12);
+            --border-glow: rgba(240, 185, 11, 0.3);
+
+            /* Text */
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1aa;
+            --text-dim: #71717a;
+
+            /* Accents */
+            --green: #22c55e;
+            --red: #ef4444;
+            --cyan: #22d3ee;
+
+            /* Typography — responsive scaling */
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --title-size: clamp(2rem, 5.5vw, 4.5rem);
+            --h2-size: clamp(1.5rem, 3.5vw, 2.75rem);
+            --h3-size: clamp(1.1rem, 2.2vw, 1.5rem);
+            --body-size: clamp(0.8rem, 1.3vw, 1.05rem);
+            --small-size: clamp(0.65rem, 1vw, 0.85rem);
+            --mono-size: clamp(0.7rem, 1vw, 0.9rem);
+
+            /* Spacing */
+            --slide-padding: clamp(1.5rem, 5vw, 5rem);
+            --content-gap: clamp(0.75rem, 2vw, 2rem);
+            --element-gap: clamp(0.3rem, 1vw, 0.75rem);
+
+            /* Animation */
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --duration: 0.7s;
+        }
+
+        /* ===========================================
+           BASE RESET
+           =========================================== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-snap-type: y mandatory;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            height: 100%;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===========================================
+           SLIDE CONTAINER
+           Each slide = exactly one viewport height
+           =========================================== */
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            padding: var(--slide-padding);
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            max-height: 100%;
+            max-width: min(95vw, 1100px);
+            overflow: hidden;
+            width: 100%;
+            text-align: center;
+        }
+
+        .slide-content.left-align {
+            text-align: left;
+            align-items: flex-start;
+        }
+
+        /* ===========================================
+           ANIMATED BACKGROUND — GLOBAL GRID + GLOW
+           =========================================== */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(240, 185, 11, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(240, 185, 11, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: -30%;
+            left: 50%;
+            width: 80vw;
+            height: 80vw;
+            max-width: 800px;
+            max-height: 800px;
+            background: radial-gradient(circle, var(--bnb-yellow-dim) 0%, transparent 70%);
+            transform: translateX(-50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .slide > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===========================================
+           TYPOGRAPHY
+           =========================================== */
+        h1 {
+            font-family: var(--font-display);
+            font-size: var(--title-size);
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+        }
+
+        h2 {
+            font-family: var(--font-display);
+            font-size: var(--h2-size);
+            font-weight: 600;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+        }
+
+        h3 {
+            font-family: var(--font-display);
+            font-size: var(--h3-size);
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        p, li {
+            font-size: var(--body-size);
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .mono {
+            font-family: var(--font-mono);
+            font-size: var(--mono-size);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--bnb-yellow) 0%, #fcd34d 50%, var(--bnb-yellow) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .yellow {
+            color: var(--bnb-yellow);
+        }
+
+        .dim {
+            color: var(--text-dim);
+        }
+
+        /* ===========================================
+           COMPONENTS
+           =========================================== */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: clamp(0.3rem, 0.8vw, 0.5rem);
+            padding: clamp(0.3rem, 0.6vw, 0.5rem) clamp(0.8rem, 1.5vw, 1.2rem);
+            background: var(--bnb-yellow-dim);
+            border: 1px solid var(--border-subtle);
+            border-radius: 100px;
+            font-family: var(--font-mono);
+            font-size: var(--small-size);
+            color: var(--bnb-yellow);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .badge .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--bnb-yellow);
+            border-radius: 50%;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--bnb-yellow-glow); }
+            50% { opacity: 0.6; box-shadow: 0 0 0 4px transparent; }
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: clamp(12px, 1.5vw, 20px);
+            padding: clamp(1rem, 2.5vw, 2rem);
+            width: 100%;
+            backdrop-filter: blur(12px);
+        }
+
+        .card-glow {
+            box-shadow: 0 0 40px -10px var(--bnb-yellow-dim),
+                        inset 0 1px 0 rgba(240, 185, 11, 0.06);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: clamp(0.75rem, 2vw, 1.5rem);
+            width: 100%;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: clamp(0.5rem, 1.5vw, 1.25rem);
+            width: 100%;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: clamp(10px, 1.2vw, 16px);
+            padding: clamp(0.75rem, 1.8vw, 1.5rem);
+            text-align: left;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--border-glow);
+            box-shadow: 0 0 20px -5px var(--bnb-yellow-dim);
+        }
+
+        .feature-card .icon {
+            font-size: clamp(1.2rem, 2vw, 1.8rem);
+            margin-bottom: clamp(0.3rem, 0.8vw, 0.6rem);
+        }
+
+        .feature-card h3 {
+            margin-bottom: clamp(0.2rem, 0.5vw, 0.4rem);
+            font-size: clamp(0.85rem, 1.5vw, 1.1rem);
+        }
+
+        .feature-card p {
+            font-size: var(--small-size);
+            line-height: 1.5;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(240, 185, 11, 0.1);
+            border-radius: clamp(8px, 1vw, 12px);
+            padding: clamp(0.8rem, 2vw, 1.5rem);
+            font-family: var(--font-mono);
+            font-size: var(--mono-size);
+            line-height: 1.7;
+            text-align: left;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .code-block .comment {
+            color: var(--text-dim);
+        }
+
+        .code-block .highlight {
+            color: var(--bnb-yellow);
+        }
+
+        .code-block .green {
+            color: var(--green);
+        }
+
+        .code-block .red {
+            color: var(--red);
+        }
+
+        .code-block .cyan {
+            color: var(--cyan);
+        }
+
+        .spacer {
+            height: var(--content-gap);
+        }
+
+        .spacer-sm {
+            height: var(--element-gap);
+        }
+
+        /* ===========================================
+           FLOW DIAGRAM — CSS-ONLY
+           =========================================== */
+        .flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(0.5rem, 1.5vw, 1.25rem);
+            flex-wrap: nowrap;
+            width: 100%;
+        }
+
+        .flow-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(0.2rem, 0.5vw, 0.4rem);
+            flex: 1;
+            min-width: 0;
+        }
+
+        .flow-step .step-icon {
+            width: clamp(36px, 5vw, 56px);
+            height: clamp(36px, 5vw, 56px);
+            border-radius: 50%;
+            background: var(--bnb-yellow-dim);
+            border: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(1rem, 2vw, 1.5rem);
+        }
+
+        .flow-step .step-label {
+            font-size: var(--small-size);
+            color: var(--text-secondary);
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .flow-step .step-label strong {
+            display: block;
+            color: var(--text-primary);
+            font-family: var(--font-display);
+            font-size: clamp(0.7rem, 1.2vw, 0.95rem);
+        }
+
+        .flow-arrow {
+            color: var(--bnb-yellow);
+            font-size: clamp(0.9rem, 1.5vw, 1.3rem);
+            flex-shrink: 0;
+            opacity: 0.5;
+        }
+
+        /* ===========================================
+           SCREENSHOT PLACEHOLDER
+           =========================================== */
+        .screenshot-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: clamp(0.75rem, 2vw, 1.5rem);
+            width: 100%;
+        }
+
+        .screenshot-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: clamp(10px, 1.2vw, 16px);
+            overflow: hidden;
+            transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+        }
+
+        .screenshot-card:hover {
+            border-color: var(--border-glow);
+            box-shadow: 0 0 30px -5px var(--bnb-yellow-dim);
+            transform: translateY(-2px);
+        }
+
+        .screenshot-mockup {
+            height: clamp(120px, 22vh, 240px);
+            background: linear-gradient(135deg, #0a0a0f 0%, #111118 100%);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(0.5rem, 1.5vw, 1rem);
+            overflow: hidden;
+        }
+
+        .screenshot-mockup::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: clamp(20px, 3vh, 32px);
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+        }
+
+        .screenshot-mockup .browser-dots {
+            position: absolute;
+            top: clamp(6px, 1vh, 10px);
+            left: clamp(8px, 1vw, 14px);
+            display: flex;
+            gap: 5px;
+            z-index: 2;
+        }
+
+        .screenshot-mockup .browser-dots span {
+            width: clamp(6px, 0.8vw, 8px);
+            height: clamp(6px, 0.8vw, 8px);
+            border-radius: 50%;
+        }
+
+        .screenshot-mockup .browser-dots span:nth-child(1) { background: #ef4444; }
+        .screenshot-mockup .browser-dots span:nth-child(2) { background: #eab308; }
+        .screenshot-mockup .browser-dots span:nth-child(3) { background: #22c55e; }
+
+        .mockup-content {
+            margin-top: clamp(14px, 2vh, 24px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(4px, 0.8vh, 8px);
+            width: 90%;
+        }
+
+        .mockup-line {
+            height: clamp(4px, 0.6vh, 6px);
+            border-radius: 3px;
+            background: rgba(240, 185, 11, 0.15);
+        }
+
+        .mockup-line.title { width: 60%; background: rgba(240, 185, 11, 0.25); height: clamp(6px, 0.8vh, 10px); }
+        .mockup-line.subtitle { width: 80%; }
+        .mockup-line.full { width: 100%; }
+        .mockup-line.short { width: 45%; }
+        .mockup-line.btn { width: 40%; background: rgba(240, 185, 11, 0.35); height: clamp(10px, 1.5vh, 18px); border-radius: 4px; }
+
+        .mockup-input {
+            width: 85%;
+            height: clamp(12px, 2vh, 22px);
+            border-radius: 4px;
+            border: 1px solid rgba(240, 185, 11, 0.1);
+            background: rgba(0,0,0,0.3);
+        }
+
+        .mockup-balance {
+            font-family: var(--font-display);
+            font-size: clamp(1rem, 2.5vw, 1.8rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--bnb-yellow), #fcd34d);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .mockup-label {
+            font-family: var(--font-mono);
+            font-size: clamp(0.45rem, 0.7vw, 0.6rem);
+            color: var(--text-dim);
+            letter-spacing: 0.05em;
+        }
+
+        .screenshot-label {
+            padding: clamp(0.5rem, 1vw, 0.8rem) clamp(0.75rem, 1.5vw, 1.2rem);
+            display: flex;
+            align-items: center;
+            gap: clamp(0.3rem, 0.6vw, 0.5rem);
+        }
+
+        .screenshot-label .page-name {
+            font-family: var(--font-display);
+            font-size: clamp(0.75rem, 1.2vw, 0.95rem);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .screenshot-label .page-route {
+            font-family: var(--font-mono);
+            font-size: var(--small-size);
+            color: var(--bnb-yellow);
+            opacity: 0.7;
+        }
+
+        /* ===========================================
+           COMPARISON TABLE
+           =========================================== */
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: var(--small-size);
+        }
+
+        .compare-table th {
+            font-family: var(--font-display);
+            font-weight: 600;
+            text-align: left;
+            padding: clamp(0.4rem, 1vw, 0.7rem) clamp(0.5rem, 1vw, 0.8rem);
+            border-bottom: 1px solid var(--border-subtle);
+            color: var(--text-dim);
+            font-size: var(--small-size);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .compare-table th:last-child {
+            color: var(--bnb-yellow);
+        }
+
+        .compare-table td {
+            padding: clamp(0.35rem, 0.8vw, 0.6rem) clamp(0.5rem, 1vw, 0.8rem);
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            color: var(--text-secondary);
+            font-size: var(--small-size);
+        }
+
+        .compare-table td:first-child {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .compare-table td:last-child {
+            color: var(--bnb-yellow);
+        }
+
+        .compare-table .cross { color: var(--red); }
+        .compare-table .check { color: var(--green); }
+
+        /* ===========================================
+           SLIDE-SPECIFIC OVERRIDES
+           =========================================== */
+        .title-slide .slide-content {
+            gap: clamp(0.8rem, 2vw, 1.5rem);
+        }
+
+        .title-slide h1 {
+            max-width: 15ch;
+        }
+
+        .title-slide .subtitle {
+            font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+            max-width: 50ch;
+        }
+
+        /* Hackathon badge */
+        .hackathon-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: clamp(0.4rem, 0.8vw, 0.6rem);
+            padding: clamp(0.4rem, 0.8vw, 0.6rem) clamp(1rem, 2vw, 1.5rem);
+            background: linear-gradient(135deg, rgba(240, 185, 11, 0.12), rgba(240, 185, 11, 0.04));
+            border: 1px solid var(--border-subtle);
+            border-radius: 100px;
+            font-family: var(--font-display);
+            font-size: clamp(0.7rem, 1.1vw, 0.9rem);
+            font-weight: 500;
+            color: var(--bnb-yellow);
+        }
+
+        .hackathon-badge img,
+        .hackathon-badge svg {
+            height: clamp(16px, 2vw, 22px);
+        }
+
+        .author-tag {
+            font-family: var(--font-mono);
+            font-size: var(--small-size);
+            color: var(--text-dim);
+            letter-spacing: 0.04em;
+        }
+
+        /* Thank you slide */
+        .thankyou-slide .slide-content {
+            gap: clamp(1rem, 2.5vw, 2rem);
+        }
+
+        .thankyou-links {
+            display: flex;
+            gap: clamp(0.75rem, 2vw, 1.5rem);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .thankyou-link {
+            display: flex;
+            align-items: center;
+            gap: clamp(0.3rem, 0.6vw, 0.5rem);
+            padding: clamp(0.4rem, 0.8vw, 0.6rem) clamp(1rem, 1.5vw, 1.2rem);
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 100px;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: var(--small-size);
+            text-decoration: none;
+            transition: border-color 0.3s, color 0.3s;
+        }
+
+        .thankyou-link:hover {
+            border-color: var(--border-glow);
+            color: var(--bnb-yellow);
+        }
+
+        /* ===========================================
+           ANIMATIONS
+           =========================================== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(25px);
+            transition: opacity var(--duration) var(--ease-out-expo),
+                        transform var(--duration) var(--ease-out-expo);
+        }
+
+        .reveal-left {
+            opacity: 0;
+            transform: translateX(-30px);
+            transition: opacity var(--duration) var(--ease-out-expo),
+                        transform var(--duration) var(--ease-out-expo);
+        }
+
+        .reveal-scale {
+            opacity: 0;
+            transform: scale(0.92);
+            transition: opacity var(--duration) var(--ease-out-expo),
+                        transform var(--duration) var(--ease-out-expo);
+        }
+
+        .slide.visible .reveal,
+        .slide.visible .reveal-left,
+        .slide.visible .reveal-scale {
+            opacity: 1;
+            transform: translateY(0) translateX(0) scale(1);
+        }
+
+        .slide.visible .reveal:nth-child(1) { transition-delay: 0s; }
+        .slide.visible .reveal:nth-child(2) { transition-delay: 0.1s; }
+        .slide.visible .reveal:nth-child(3) { transition-delay: 0.2s; }
+        .slide.visible .reveal:nth-child(4) { transition-delay: 0.3s; }
+        .slide.visible .reveal:nth-child(5) { transition-delay: 0.4s; }
+        .slide.visible .reveal:nth-child(6) { transition-delay: 0.5s; }
+
+        /* Floating animation for decorative elements */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% { box-shadow: 0 0 20px -5px var(--bnb-yellow-dim); }
+            50% { box-shadow: 0 0 40px -5px var(--bnb-yellow-glow); }
+        }
+
+        /* ===========================================
+           PROGRESS BAR
+           =========================================== */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--bnb-yellow), #fcd34d);
+            z-index: 100;
+            transition: width 0.3s var(--ease-out-expo);
+            box-shadow: 0 0 10px var(--bnb-yellow-glow);
+        }
+
+        /* ===========================================
+           NAV DOTS
+           =========================================== */
+        .nav-dots {
+            position: fixed;
+            right: clamp(12px, 2vw, 24px);
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            padding: 0;
+        }
+
+        .nav-dot.active {
+            background: var(--bnb-yellow);
+            box-shadow: 0 0 8px var(--bnb-yellow-glow);
+            transform: scale(1.3);
+        }
+
+        .nav-dot:hover:not(.active) {
+            background: rgba(240, 185, 11, 0.4);
+        }
+
+        /* ===========================================
+           SLIDE COUNTER
+           =========================================== */
+        .slide-counter {
+            position: fixed;
+            bottom: clamp(12px, 2vw, 24px);
+            right: clamp(12px, 2vw, 24px);
+            font-family: var(--font-mono);
+            font-size: var(--small-size);
+            color: var(--text-dim);
+            z-index: 100;
+        }
+
+        .slide-counter .current {
+            color: var(--bnb-yellow);
+        }
+
+        /* ===========================================
+           RESPONSIVE BREAKPOINTS
+           =========================================== */
+        @media (max-height: 700px) {
+            :root {
+                --slide-padding: clamp(1rem, 3vw, 2.5rem);
+                --content-gap: clamp(0.5rem, 1.5vw, 1rem);
+                --title-size: clamp(1.5rem, 5vw, 3rem);
+                --h2-size: clamp(1.2rem, 3vw, 2rem);
+            }
+        }
+
+        @media (max-height: 600px) {
+            :root {
+                --slide-padding: clamp(0.75rem, 2.5vw, 1.5rem);
+                --content-gap: clamp(0.3rem, 1vw, 0.75rem);
+                --title-size: clamp(1.25rem, 4.5vw, 2.5rem);
+                --body-size: clamp(0.7rem, 1.2vw, 0.95rem);
+            }
+            .nav-dots, .decorative { display: none; }
+        }
+
+        @media (max-height: 500px) {
+            :root {
+                --slide-padding: clamp(0.5rem, 2vw, 1rem);
+                --title-size: clamp(1rem, 4vw, 2rem);
+                --h2-size: clamp(0.9rem, 2.5vw, 1.5rem);
+                --body-size: clamp(0.65rem, 1vw, 0.85rem);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .grid-3 { grid-template-columns: 1fr 1fr; }
+            .screenshot-grid { grid-template-columns: 1fr 1fr; }
+            .flow { flex-wrap: wrap; }
+        }
+
+        @media (max-width: 500px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .grid-3 { grid-template-columns: 1fr; }
+            .screenshot-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.2s !important;
+            }
+            html { scroll-behavior: auto; }
+        }
+
+        /* ===========================================
+           PARTICLES CANVAS
+           =========================================== */
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* BNB Logo SVG inline styles */
+        .bnb-logo-glyph {
+            width: clamp(40px, 6vw, 64px);
+            height: clamp(40px, 6vw, 64px);
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* Numbered step */
+        .step-number {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            color: rgba(240, 185, 11, 0.08);
+            line-height: 1;
+            position: absolute;
+            top: clamp(0.5rem, 1vw, 0.8rem);
+            right: clamp(0.5rem, 1vw, 0.8rem);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Particle background -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- Progress bar -->
+    <div class="progress-bar" id="progress-bar"></div>
+
+    <!-- Nav dots -->
+    <nav class="nav-dots" id="nav-dots"></nav>
+
+    <!-- Slide counter -->
+    <div class="slide-counter">
+        <span class="current" id="counter-current">01</span> / <span id="counter-total">08</span>
+    </div>
+
+    <!-- ===========================================
+         SLIDE 1: TITLE
+         =========================================== -->
+    <section class="slide title-slide" data-slide="0">
+        <div class="slide-content">
+            <div class="hackathon-badge reveal">
+                <svg class="bnb-logo-glyph" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:22px;height:22px;animation:none">
+                    <circle cx="16" cy="16" r="16" fill="#F0B90B"/>
+                    <path d="M16 6l3.09 3.09L12.18 16l6.91 6.91L16 26l-10-10L16 6z" fill="#060609"/>
+                    <path d="M19.09 9.09L16 6l10 10-10 10 3.09-3.09L26 16l-6.91-6.91z" fill="#060609"/>
+                    <path d="M12.18 16L16 12.18 19.82 16 16 19.82 12.18 16z" fill="#060609"/>
+                </svg>
+                BNB Chain Hackathon 2025
+            </div>
+
+            <h1 class="reveal"><span class="gradient-text">GhostFund</span></h1>
+
+            <p class="subtitle reveal" style="color: var(--text-secondary);">
+                Privacy Gas Relayer for BNB Chain
+            </p>
+
+            <div class="spacer-sm"></div>
+
+            <p class="author-tag reveal">Built by Priyanshu Dangi</p>
+        </div>
+    </section>
+
+    <!-- ===========================================
+         SLIDE 2: THE PROBLEM
+         =========================================== -->
+    <section class="slide" data-slide="1">
+        <div class="slide-content">
+            <div class="badge reveal"><span class="dot"></span> The Problem</div>
+            <div class="spacer-sm"></div>
+
+            <h2 class="reveal">Every wallet transfer is <span class="gradient-text">permanently public</span></h2>
+
+            <div class="spacer"></div>
+
+            <div class="code-block reveal">
+                <span class="comment">// What the blockchain reveals:</span><br>
+                <span class="red">Binance Hot Wallet</span> <span class="dim">&rarr;</span> <span class="red">0xFreshWallet</span><br>
+                <br>
+                <span class="comment">// Anyone can see this on BscScan — forever.</span><br>
+                <span class="comment">// Employers, adversaries, analytics firms</span><br>
+                <span class="comment">// can trace your identity instantly.</span>
+            </div>
+
+            <div class="spacer"></div>
+
+            <p class="reveal" style="max-width: 55ch; text-align: center;">
+                The moment you withdraw from a centralized exchange to a fresh wallet, your <span class="yellow">real identity is permanently linked</span> to that address on-chain.
+            </p>
+        </div>
+    </section>
+
+    <!-- ===========================================
+         SLIDE 3: WHY EXISTING SOLUTIONS FAIL
+         =========================================== -->
+    <section class="slide" data-slide="2">
+        <div class="slide-content">
+            <div class="badge reveal"><span class="dot"></span> Why Now</div>
+            <div class="spacer-sm"></div>
+
+            <h2 class="reveal">Existing solutions <span class="gradient-text">don't work</span></h2>
+
+            <div class="spacer"></div>
+
+            <div class="card reveal" style="overflow: auto; max-height: min(55vh, 400px);">
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Tornado Cash</th>
+                            <th>GhostFund</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Amount flexibility</td>
+                            <td><span class="cross">&#10005;</span> Fixed denominations</td>
+                            <td><span class="check">&#10003;</span> Any BNB amount</td>
+                        </tr>
+                        <tr>
+                            <td>Compliance</td>
+                            <td><span class="cross">&#10005;</span> OFAC sanctioned</td>
+                            <td><span class="check">&#10003;</span> PPOI built-in</td>
+                        </tr>
+                        <tr>
+                            <td>Token support</td>
+                            <td><span class="cross">&#10005;</span> One pool per denomination</td>
+                            <td><span class="check">&#10003;</span> BNB + any BEP-20</td>
+                        </tr>
+                        <tr>
+                            <td>Gas for recipient</td>
+                            <td><span class="cross">&#10005;</span> User's problem</td>
+                            <td><span class="check">&#10003;</span> Relayer pays gas</td>
+                        </tr>
+                        <tr>
+                            <td>Target chain</td>
+                            <td><span class="cross">&#10005;</span> Ethereum only</td>
+                            <td><span class="check">&#10003;</span> BNB Chain native</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="spacer-sm"></div>
+            <p class="reveal dim" style="text-align: center;">
+                There is no production-ready privacy relayer on BNB Chain today.
+            </p>
+        </div>
+    </section>
+
+    <!-- ===========================================
+         SLIDE 4: OUR SOLUTION
+         =========================================== -->
+    <section class="slide" data-slide="3">
+        <div class="slide-content">
+            <div class="badge reveal"><span class="dot"></span> The Solution</div>
+            <div class="spacer-sm"></div>
+
+            <h2 class="reveal">Break the link with <span class="gradient-text">zero-knowledge proofs</span></h2>
+
+            <div class="spacer"></div>
+
+            <div class="flow reveal">
+                <div class="flow-step">
+                    <div class="step-icon">&#128274;</div>
+                    <div class="step-label">
+                        <strong>Shield</strong>
+                        Wallet A deposits BNB into an encrypted Merkle tree
+                    </div>
+                </div>
+                <div class="flow-arrow">&rarr;</div>
+                <div class="flow-step">
+                    <div class="step-icon">&#128064;</div>
+                    <div class="step-label">
+                        <strong>Private Pool</strong>
+                        Tokens are hidden among all other depositors
+                    </div>
+                </div>
+                <div class="flow-arrow">&rarr;</div>
+                <div class="flow-step">
+                    <div class="step-icon">&#9889;</div>
+                    <div class="step-label">
+                        <strong>ZK Proof</strong>
+                        Groth16 proof proves ownership without revealing source
+                    </div>
+                </div>
+                <div class="flow-arrow">&rarr;</div>
+                <div class="flow-step">
+                    <div class="step-icon">&#127881;</div>
+                    <div class="step-label">
+                        <strong>Unshield</strong>
+                        Wallet B receives BNB — no link to Wallet A
+                    </div>
+                </div>
+            </div>
+
+            <div class="spacer"></div>
+
+            <div class="code-block reveal">
+                <span class="comment">// What the blockchain sees:</span><br>
+                <span class="dim">TX 1:</span> <span class="cyan">0xSource</span> <span class="dim">&rarr;</span> RailgunProxy &nbsp; <span class="comment">// one of many deposits</span><br>
+                <span class="dim">TX 2:</span> <span class="highlight">GhostRelayer</span> <span class="dim">&rarr;</span> RailgunProxy &nbsp; <span class="comment">// unshield to 0xDest</span><br>
+                <br>
+                <span class="green">// Result: No transaction between 0xSource and 0xDest &#10003;</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===========================================
+         SLIDE 5: ARCHITECTURE — WHAT WE BUILT
+         =========================================== -->
+    <section class="slide" data-slide="4">
+        <div class="slide-content">
+            <div class="badge reveal"><span class="dot"></span> Built During Hackathon</div>
+            <div class="spacer-sm"></div>
+
+            <h2 class="reveal">Everything deployed <span class="gradient-text">from scratch</span></h2>
+
+            <div class="spacer"></div>
+
+            <div class="grid-3 reveal">
+                <div class="feature-card" style="position:relative;">
+                    <span class="step-number">01</span>
+                    <div class="icon">&#128220;</div>
+                    <h3>Smart Contracts</h3>
+                    <p>Railgun contracts + custom GhostPaymaster deployed to BSC Testnet</p>
+                </div>
+                <div class="feature-card" style="position:relative;">
+                    <span class="step-number">02</span>
+                    <div class="icon">&#9881;&#65039;</div>
+                    <h3>Backend Engine</h3>
+                    <p>Railgun SDK with runtime patching, ZK prover, relayer service</p>
+                </div>
+                <div class="feature-card" style="position:relative;">
+                    <span class="step-number">03</span>
+                    <div class="icon">&#128187;</div>
+                    <h3>Frontend App</h3>
+                    <p>Next.js 14 + wagmi v2 — shield, status, and unshield pages</p>
+                </div>
+                <div class="feature-card" style="position:relative;">
+                    <span class="step-number">04</span>
+                    <div class="icon">&#128176;</div>
+                    <h3>GhostPaymaster</h3>
+                    <p>On-chain gas reimbursement pool — relayer gets paid trustlessly</p>
+                </div>
+                <div class="feature-card" style="position:relative;">
+                    <span class="step-number">05</span>
+                    <div class="icon">&#128274;</div>
+                    <h3>ZK Proof Pipeline</h3>
+                    <p>Server-side Groth16 via snarkjs — user's browser stays lightweight</p>
+                </div>
+                <div class="feature-card" style="position:relative;">
+                    <span class="step-number">06</span>
+                    <div class="icon">&#128640;</div>
+                    <h3>Gas Relayer</h3>
+                    <p>Destination wallet needs $0 — relayer signs and pays for everything</p>
+                </div>
+            </div>
+
+            <div class="spacer-sm"></div>
+
+            <p class="reveal dim" style="text-align: center; font-family: var(--font-mono); font-size: var(--small-size);">
+                All money flow — shield &rarr; pool &rarr; paymaster &rarr; unshield — is our code deployed on BSC Testnet
+            </p>
+        </div>
+    </section>
+
+    <!-- ===========================================
+         SLIDE 6: TECH STACK
+         =========================================== -->
+    <section class="slide" data-slide="5">
+        <div class="slide-content">
+            <div class="badge reveal"><span class="dot"></span> Tech Stack</div>
+            <div class="spacer-sm"></div>
+
+            <h2 class="reveal">Powered by <span class="gradient-text">proven technology</span></h2>
+
+            <div class="spacer"></div>
+
+            <div class="grid-2 reveal">
+                <div class="card">
+                    <h3 style="margin-bottom: var(--element-gap);">&#127760; Frontend</h3>
+                    <div class="code-block" style="border: none; padding: clamp(0.4rem, 1vw, 0.8rem);">
+                        <span class="highlight">Next.js 14</span> <span class="dim">App Router</span><br>
+                        <span class="highlight">wagmi v2</span> <span class="dim">+ viem</span><br>
+                        <span class="highlight">TailwindCSS</span><br>
+                        <span class="highlight">React Query</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 style="margin-bottom: var(--element-gap);">&#9881;&#65039; Backend</h3>
+                    <div class="code-block" style="border: none; padding: clamp(0.4rem, 1vw, 0.8rem);">
+                        <span class="highlight">Express</span> <span class="dim">+ TypeScript</span><br>
+                        <span class="highlight">ethers.js v6</span><br>
+                        <span class="highlight">Railgun SDK</span> <span class="dim">wallet v10.4</span><br>
+                        <span class="highlight">snarkjs</span> <span class="dim">Groth16 prover</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 style="margin-bottom: var(--element-gap);">&#128279; Contracts</h3>
+                    <div class="code-block" style="border: none; padding: clamp(0.4rem, 1vw, 0.8rem);">
+                        <span class="highlight">Solidity</span> <span class="dim">+ Hardhat</span><br>
+                        <span class="highlight">OpenZeppelin</span> <span class="dim">v5</span><br>
+                        <span class="highlight">Railgun Contracts</span><br>
+                        <span class="highlight">GhostPaymaster</span> <span class="dim">(custom)</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 style="margin-bottom: var(--element-gap);">&#9939;&#65039; Privacy</h3>
+                    <div class="code-block" style="border: none; padding: clamp(0.4rem, 1vw, 0.8rem);">
+                        <span class="highlight">Railgun</span> <span class="dim">UTXO Merkle tree</span><br>
+                        <span class="highlight">Groth16</span> <span class="dim">ZK proofs</span><br>
+                        <span class="highlight">PPOI</span> <span class="dim">compliance layer</span><br>
+                        <span class="highlight">BNB Chain</span> <span class="dim">Testnet (ID: 97)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===========================================
+         SLIDE 7: APP SCREENSHOTS
+         =========================================== -->
+    <section class="slide" data-slide="6">
+        <div class="slide-content">
+            <div class="badge reveal"><span class="dot"></span> Live Demo</div>
+            <div class="spacer-sm"></div>
+
+            <h2 class="reveal">The <span class="gradient-text">GhostFund</span> experience</h2>
+
+            <div class="spacer"></div>
+
+            <div class="screenshot-grid reveal">
+                <!-- Landing Page -->
+                <div class="screenshot-card">
+                    <div class="screenshot-mockup">
+                        <div class="browser-dots"><span></span><span></span><span></span></div>
+                        <div class="mockup-content">
+                            <div class="mockup-line title"></div>
+                            <div class="mockup-line subtitle"></div>
+                            <div style="display:flex;gap:6px;margin-top:4px;">
+                                <div class="mockup-line btn" style="width:clamp(40px,8vw,80px);"></div>
+                                <div class="mockup-line btn" style="width:clamp(40px,8vw,80px); opacity:0.4;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="screenshot-label">
+                        <span class="page-name">Landing</span>
+                        <span class="page-route">/</span>
+                    </div>
+                </div>
+
+                <!-- Shield Page -->
+                <div class="screenshot-card">
+                    <div class="screenshot-mockup">
+                        <div class="browser-dots"><span></span><span></span><span></span></div>
+                        <div class="mockup-content">
+                            <div class="mockup-label">SHIELD BNB</div>
+                            <div class="mockup-input"></div>
+                            <div class="mockup-line full" style="margin-top:3px;"></div>
+                            <div class="mockup-line short"></div>
+                            <div class="mockup-line btn" style="width:90%; margin-top:4px;"></div>
+                        </div>
+                    </div>
+                    <div class="screenshot-label">
+                        <span class="page-name">Shield</span>
+                        <span class="page-route">/shield</span>
+                    </div>
+                </div>
+
+                <!-- Status Page -->
+                <div class="screenshot-card">
+                    <div class="screenshot-mockup">
+                        <div class="browser-dots"><span></span><span></span><span></span></div>
+                        <div class="mockup-content">
+                            <div class="mockup-label">PRIVATE BALANCE</div>
+                            <div class="mockup-balance">0.992 BNB</div>
+                            <div class="mockup-label" style="margin-top:2px;">SHIELDED AS WBNB</div>
+                        </div>
+                    </div>
+                    <div class="screenshot-label">
+                        <span class="page-name">Status</span>
+                        <span class="page-route">/status</span>
+                    </div>
+                </div>
+
+                <!-- Unshield Page -->
+                <div class="screenshot-card">
+                    <div class="screenshot-mockup">
+                        <div class="browser-dots"><span></span><span></span><span></span></div>
+                        <div class="mockup-content">
+                            <div class="mockup-label">UNSHIELD BNB</div>
+                            <div class="mockup-input"></div>
+                            <div class="mockup-input" style="margin-top:3px;"></div>
+                            <div class="mockup-line full" style="margin-top:3px;"></div>
+                            <div class="mockup-line btn" style="width:90%; margin-top:4px;"></div>
+                        </div>
+                    </div>
+                    <div class="screenshot-label">
+                        <span class="page-name">Unshield</span>
+                        <span class="page-route">/unshield</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="spacer-sm"></div>
+            <p class="reveal dim" style="text-align: center; font-family: var(--font-mono); font-size: var(--small-size);">
+                Dark theme &bull; BNB yellow accents &bull; MetaMask integration &bull; Real-time ZK proof status
+            </p>
+        </div>
+    </section>
+
+    <!-- ===========================================
+         SLIDE 8: DEPLOYED ON-CHAIN
+         =========================================== -->
+    <section class="slide" data-slide="7">
+        <div class="slide-content">
+            <div class="badge reveal"><span class="dot"></span> Live on BSC Testnet</div>
+            <div class="spacer-sm"></div>
+
+            <h2 class="reveal">Verified on <span class="gradient-text">BscScan</span></h2>
+
+            <div class="spacer"></div>
+
+            <div class="code-block reveal" style="max-height: min(50vh, 360px); overflow: auto;">
+                <span class="comment">// Deployed contracts — BSC Testnet (Chain ID 97)</span><br><br>
+                <span class="dim">RailgunProxy</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">0x5e0d11D4...b7c0</span><br>
+                <span class="dim">RailgunLogic</span>&nbsp;&nbsp;&nbsp;<span class="highlight">0xc179f11a...A5e1</span><br>
+                <span class="dim">RelayAdapt</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">0x25479883...A52C</span><br>
+                <span class="dim">WBNB</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">0xAc21F2a5...9033</span><br>
+                <span class="dim">GhostPaymaster</span>&nbsp;<span class="highlight">0x77aDC78a...efcF</span><br>
+                <span class="dim">Treasury</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">0xCCe5Ef96...d8e2C</span><br>
+                <span class="dim">Verifier</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="green">Groth16 on-chain verification</span><br>
+                <span class="dim">PoseidonT3/T4</span>&nbsp;&nbsp;<span class="green">Merkle tree hash functions</span><br><br>
+                <span class="dim">Deployer</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cyan">0x117A3E11...61C5</span>
+            </div>
+
+            <div class="spacer"></div>
+
+            <div class="grid-3 reveal">
+                <div class="feature-card" style="text-align:center;">
+                    <div style="font-size: clamp(1.5rem, 3vw, 2.5rem); font-family: var(--font-display); font-weight: 700; color: var(--bnb-yellow);">10+</div>
+                    <p>Contracts deployed</p>
+                </div>
+                <div class="feature-card" style="text-align:center;">
+                    <div style="font-size: clamp(1.5rem, 3vw, 2.5rem); font-family: var(--font-display); font-weight: 700; color: var(--bnb-yellow);">~0.8%</div>
+                    <p>Total fee per transfer</p>
+                </div>
+                <div class="feature-card" style="text-align:center;">
+                    <div style="font-size: clamp(1.5rem, 3vw, 2.5rem); font-family: var(--font-display); font-weight: 700; color: var(--bnb-yellow);">$0</div>
+                    <p>Gas needed by recipient</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===========================================
+         SLIDE 9: THANK YOU
+         =========================================== -->
+    <section class="slide thankyou-slide" data-slide="8">
+        <div class="slide-content">
+            <svg class="bnb-logo-glyph reveal" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="animation: glow-pulse 3s ease-in-out infinite, float 4s ease-in-out infinite;">
+                <circle cx="16" cy="16" r="16" fill="#F0B90B"/>
+                <path d="M16 6l3.09 3.09L12.18 16l6.91 6.91L16 26l-10-10L16 6z" fill="#060609"/>
+                <path d="M19.09 9.09L16 6l10 10-10 10 3.09-3.09L26 16l-6.91-6.91z" fill="#060609"/>
+                <path d="M12.18 16L16 12.18 19.82 16 16 19.82 12.18 16z" fill="#060609"/>
+            </svg>
+
+            <h1 class="reveal"><span class="gradient-text">Thank You</span></h1>
+
+            <p class="subtitle reveal" style="color: var(--text-secondary); max-width: 40ch;">
+                GhostFund — Privacy Gas Relayer for BNB Chain
+            </p>
+
+            <div class="spacer"></div>
+
+            <div class="thankyou-links reveal">
+                <a href="https://github.com/PriyanshuDangi/bnb_ghostfund" target="_blank" class="thankyou-link">
+                    &#128187;&nbsp; GitHub
+                </a>
+                <a href="https://testnet.bscscan.com/address/0x5e0d11D4Ba0B606c4dd19eAbce2d43daFCE6b7c0" target="_blank" class="thankyou-link">
+                    &#128279;&nbsp; BscScan
+                </a>
+                <a href="https://github.com/PriyanshuDangi" target="_blank" class="thankyou-link">
+                    &#128100;&nbsp; Priyanshu Dangi
+                </a>
+            </div>
+
+            <div class="spacer"></div>
+
+            <p class="author-tag reveal">
+                Built with Railgun SDK &bull; Groth16 ZK Proofs &bull; BNB Chain Testnet
+            </p>
+        </div>
+    </section>
+
+
+    <!-- ===========================================
+       PRESENTATION CONTROLLER
+       =========================================== -->
+    <script>
+        class SlidePresentation {
+            constructor() {
+                this.slides = document.querySelectorAll('.slide');
+                this.totalSlides = this.slides.length;
+                this.currentSlide = 0;
+                this.isScrolling = false;
+                this.scrollCooldown = 800;
+
+                document.getElementById('counter-total', '0' + this.totalSlides).textContent =
+                    String(this.totalSlides).padStart(2, '0');
+
+                this.createNavDots();
+                this.setupIntersectionObserver();
+                this.setupKeyboard();
+                this.setupWheel();
+                this.setupTouch();
+                this.updateUI();
+            }
+
+            createNavDots() {
+                const nav = document.getElementById('nav-dots');
+                for (let i = 0; i < this.totalSlides; i++) {
+                    const dot = document.createElement('button');
+                    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+                    dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+                    dot.addEventListener('click', () => this.goToSlide(i));
+                    nav.appendChild(dot);
+                }
+            }
+
+            setupIntersectionObserver() {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                            const idx = parseInt(entry.target.dataset.slide);
+                            if (!isNaN(idx)) {
+                                this.currentSlide = idx;
+                                this.updateUI();
+                            }
+                        }
+                    });
+                }, { threshold: 0.5 });
+
+                this.slides.forEach(slide => observer.observe(slide));
+            }
+
+            setupKeyboard() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+                        e.preventDefault();
+                        this.next();
+                    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                        e.preventDefault();
+                        this.prev();
+                    }
+                });
+            }
+
+            setupWheel() {
+                document.addEventListener('wheel', (e) => {
+                    if (this.isScrolling) return;
+                    this.isScrolling = true;
+
+                    if (e.deltaY > 30) this.next();
+                    else if (e.deltaY < -30) this.prev();
+
+                    setTimeout(() => { this.isScrolling = false; }, this.scrollCooldown);
+                }, { passive: true });
+            }
+
+            setupTouch() {
+                let startY = 0;
+                document.addEventListener('touchstart', (e) => {
+                    startY = e.touches[0].clientY;
+                }, { passive: true });
+
+                document.addEventListener('touchend', (e) => {
+                    const diff = startY - e.changedTouches[0].clientY;
+                    if (Math.abs(diff) > 50) {
+                        if (diff > 0) this.next();
+                        else this.prev();
+                    }
+                }, { passive: true });
+            }
+
+            next() {
+                if (this.currentSlide < this.totalSlides - 1) {
+                    this.goToSlide(this.currentSlide + 1);
+                }
+            }
+
+            prev() {
+                if (this.currentSlide > 0) {
+                    this.goToSlide(this.currentSlide - 1);
+                }
+            }
+
+            goToSlide(index) {
+                this.currentSlide = index;
+                this.slides[index].scrollIntoView({ behavior: 'smooth' });
+                this.updateUI();
+            }
+
+            updateUI() {
+                // Progress bar
+                const progress = ((this.currentSlide + 1) / this.totalSlides) * 100;
+                document.getElementById('progress-bar').style.width = progress + '%';
+
+                // Counter
+                document.getElementById('counter-current').textContent =
+                    String(this.currentSlide + 1).padStart(2, '0');
+
+                // Nav dots
+                document.querySelectorAll('.nav-dot').forEach((dot, i) => {
+                    dot.classList.toggle('active', i === this.currentSlide);
+                });
+            }
+        }
+
+        /* ===========================================
+           PARTICLE SYSTEM
+           Floating golden particles in the background
+           =========================================== */
+        class ParticleSystem {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.particles = [];
+                this.resize();
+                this.init();
+                this.animate();
+                window.addEventListener('resize', () => this.resize());
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            init() {
+                const count = Math.min(40, Math.floor(window.innerWidth / 30));
+                for (let i = 0; i < count; i++) {
+                    this.particles.push({
+                        x: Math.random() * this.canvas.width,
+                        y: Math.random() * this.canvas.height,
+                        radius: Math.random() * 1.5 + 0.3,
+                        vx: (Math.random() - 0.5) * 0.3,
+                        vy: (Math.random() - 0.5) * 0.3,
+                        alpha: Math.random() * 0.3 + 0.05
+                    });
+                }
+            }
+
+            animate() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                this.particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    if (p.x < 0) p.x = this.canvas.width;
+                    if (p.x > this.canvas.width) p.x = 0;
+                    if (p.y < 0) p.y = this.canvas.height;
+                    if (p.y > this.canvas.height) p.y = 0;
+
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    this.ctx.fillStyle = `rgba(240, 185, 11, ${p.alpha})`;
+                    this.ctx.fill();
+                });
+
+                // Draw faint connections between nearby particles
+                for (let i = 0; i < this.particles.length; i++) {
+                    for (let j = i + 1; j < this.particles.length; j++) {
+                        const dx = this.particles[i].x - this.particles[j].x;
+                        const dy = this.particles[i].y - this.particles[j].y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 120) {
+                            this.ctx.beginPath();
+                            this.ctx.moveTo(this.particles[i].x, this.particles[i].y);
+                            this.ctx.lineTo(this.particles[j].x, this.particles[j].y);
+                            this.ctx.strokeStyle = `rgba(240, 185, 11, ${0.03 * (1 - dist / 120)})`;
+                            this.ctx.lineWidth = 0.5;
+                            this.ctx.stroke();
+                        }
+                    }
+                }
+
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        // Initialize on DOM ready
+        document.addEventListener('DOMContentLoaded', () => {
+            new SlidePresentation();
+            new ParticleSystem(document.getElementById('particles-canvas'));
+        });
+    </script>
+
+</body>
+</html>
