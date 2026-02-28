@@ -1,0 +1,29 @@
+# GhostFund — Deployed Contracts on BNB Smart Chain Testnet (Chain ID 97)
+# Network: BSC Testnet
+# Explorer: https://testnet.bscscan.com
+# Deployer: 0x117A3E11a93B2C88713bd35bE47FaFb81E4461C5
+# Deployment Block: 92832756
+
+## Railgun Privacy Infrastructure (deployed from railgun-privacy/contract)
+
+RailgunProxy (EIP-1967 Proxy)    0x5e0d11D4Ba0B606c4dd19eAbce2d43daFCE6b7c0  https://testnet.bscscan.com/address/0x5e0d11D4Ba0B606c4dd19eAbce2d43daFCE6b7c0
+RailgunLogic (Implementation)    0xc179f11aa184D21fE1945a780e15979b1392A5e1  https://testnet.bscscan.com/address/0xc179f11aa184D21fE1945a780e15979b1392A5e1
+RelayAdapt                       0x254798830B89f716E66D2F77b611320883a7A52C  https://testnet.bscscan.com/address/0x254798830B89f716E66D2F77b611320883a7A52C
+WBNB (WETH9)                     0xAc21F2a5fA4297bE7E150Dd8133BcaDe04979033  https://testnet.bscscan.com/address/0xAc21F2a5fA4297bE7E150Dd8133BcaDe04979033
+ProxyAdmin                       0xC89C2c1b5928bc7FaDfa8eC105AdFE20AC48d790  https://testnet.bscscan.com/address/0xC89C2c1b5928bc7FaDfa8eC105AdFE20AC48d790
+Delegator                        0xc4047d9fD0D75da6C0E45bF312f77B44211bB9Bf  https://testnet.bscscan.com/address/0xc4047d9fD0D75da6C0E45bF312f77B44211bB9Bf
+Staking                          0xDE8c68317AB8699A37E208Ef6EE7Ef8E173707E1  https://testnet.bscscan.com/address/0xDE8c68317AB8699A37E208Ef6EE7Ef8E173707E1
+Voting                           0xe2894DCAdd508f46B5Ad1ebBC771D48b86D54167  https://testnet.bscscan.com/address/0xe2894DCAdd508f46B5Ad1ebBC771D48b86D54167
+Treasury Implementation          0x822A5a9649458DCBa3A9764e6255EaE3475d1fD8  https://testnet.bscscan.com/address/0x822A5a9649458DCBa3A9764e6255EaE3475d1fD8
+Treasury Proxy                   0xCCe5Ef96204Fa5cf8bB23830bAF16D84172d8e2C  https://testnet.bscscan.com/address/0xCCe5Ef96204Fa5cf8bB23830bAF16D84172d8e2C
+PoseidonT3                       0x94bA707a86Fc30750080521B60B166105D52DA60  https://testnet.bscscan.com/address/0x94bA707a86Fc30750080521B60B166105D52DA60
+PoseidonT4                       0x8aDc3a89Bd8CB343F153724865289703b0E206A5  https://testnet.bscscan.com/address/0x8aDc3a89Bd8CB343F153724865289703b0E206A5
+AdminERC20 (RailTest)            0x683d88bB2a6b7ddA3675881EA5e1E064e92fbA30  https://testnet.bscscan.com/address/0x683d88bB2a6b7ddA3675881EA5e1E064e92fbA30
+
+## GhostFund Application Contracts (custom, written by us)
+
+GhostPaymaster                   0x77aDC78a0dfE3A7622149b93977cEe68343eefcF  https://testnet.bscscan.com/address/0x77aDC78a0dfE3A7622149b93977cEe68343eefcF
+
+## Key Accounts
+
+Deployer / Relayer Wallet        0x117A3E11a93B2C88713bd35bE47FaFb81E4461C5  https://testnet.bscscan.com/address/0x117A3E11a93B2C88713bd35bE47FaFb81E4461C5
