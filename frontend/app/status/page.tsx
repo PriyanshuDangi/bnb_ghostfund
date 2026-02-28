@@ -18,7 +18,6 @@ export default function StatusPage() {
       try {
         const parsed = JSON.parse(stored);
         setWalletInfo(parsed);
-        // Re-register wallet on the backend (handles backend restarts)
         if (parsed.mnemonic) {
           createWallet(parsed.mnemonic).catch(() => {});
         }
@@ -48,9 +47,10 @@ export default function StatusPage() {
 
   return (
     <div className="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold mb-2">Private Balance</h1>
-        <p className="text-gray-400">
+        <p className="text-gray-500">
           View your shielded BNB balance. This balance is invisible to on-chain
           observers.
         </p>
@@ -59,42 +59,49 @@ export default function StatusPage() {
       {!walletInfo ? (
         <div className="card text-center py-8">
           <p className="text-gray-400 mb-2">No private wallet found.</p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-600">
             Shield BNB first to create your private 0zk wallet.
           </p>
         </div>
       ) : (
         <div className="space-y-6">
-          <div className="card">
-            <div className="text-center">
-              <p className="text-sm text-gray-500 mb-1">Shielded Balance</p>
-              <p className="text-4xl font-bold gradient-text mb-1">
-                {loading ? '...' : balance?.balanceFormatted ?? '0.000000'}
-              </p>
-              <p className="text-sm text-gray-400">BNB (shielded as WBNB)</p>
-            </div>
+          {/* Balance hero */}
+          <div className="card text-center bg-gradient-to-b from-surface-50 to-surface-100 border-bnb-400/15">
+            <p className="text-sm text-gray-600 mb-2 uppercase tracking-wider font-medium">
+              Shielded Balance
+            </p>
+            <p className="text-5xl font-bold gradient-text mb-1">
+              {loading ? '...' : balance?.balanceFormatted ?? '0.000000'}
+            </p>
+            <p className="text-sm text-gray-500">BNB (shielded as WBNB)</p>
           </div>
 
+          {/* Wallet details */}
           <div className="card">
             <h3 className="text-sm font-semibold text-gray-300 mb-3">
               Wallet Details
             </h3>
             <div className="space-y-3">
               <div>
-                <p className="text-xs text-gray-500">Wallet ID</p>
+                <p className="text-xs text-gray-600 uppercase tracking-wider mb-0.5">
+                  Wallet ID
+                </p>
                 <p className="text-sm font-mono text-gray-300 break-all">
                   {walletInfo.id}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">0zk Address</p>
-                <p className="text-sm font-mono text-ghost-400 break-all">
+                <p className="text-xs text-gray-600 uppercase tracking-wider mb-0.5">
+                  0zk Address
+                </p>
+                <p className="text-sm font-mono text-bnb-400 break-all">
                   {walletInfo.railgunAddress}
                 </p>
               </div>
             </div>
           </div>
 
+          {/* Refresh */}
           <button
             onClick={fetchBalance}
             disabled={loading}
@@ -103,19 +110,21 @@ export default function StatusPage() {
             {loading ? 'Scanning Merkle tree...' : 'Refresh Balance'}
           </button>
 
+          {/* Error */}
           {error && (
-            <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4">
+            <div className="panel-error">
               <p className="text-sm text-red-400">{error}</p>
             </div>
           )}
 
-          <div className="rounded-xl bg-gray-900/50 border border-gray-800 p-4">
+          {/* Privacy info */}
+          <div className="card-flat">
             <h3 className="text-sm font-semibold text-gray-300 mb-2">
               Privacy Info
             </h3>
-            <ul className="text-xs text-gray-500 space-y-1.5 list-disc list-inside">
+            <ul className="text-xs text-gray-600 space-y-1.5 list-disc list-inside">
               <li>
-                Your balance is stored in an encrypted Merkle tree — only you
+                Your balance is stored in an encrypted Merkle tree &mdash; only you
                 can see it
               </li>
               <li>

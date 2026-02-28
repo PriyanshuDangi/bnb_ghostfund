@@ -4,32 +4,85 @@
 
 @layer base {
   body {
-    @apply bg-gray-950 text-gray-100 antialiased;
+    background-color: #0a0a0a;
+    @apply text-gray-100 antialiased;
   }
 }
 
 @layer components {
+  /* ── Cards ── */
   .card {
-    @apply rounded-2xl border border-gray-800 bg-gray-900/80 backdrop-blur-xl p-6 shadow-xl;
+    @apply rounded-2xl border border-surface-400/60 bg-surface-50 p-6 shadow-card
+           transition-all duration-300 hover:shadow-card-hover hover:border-bnb-400/20;
   }
 
+  .card-flat {
+    @apply rounded-xl border border-surface-400/40 bg-surface-100 p-4;
+  }
+
+  /* ── Buttons ── */
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-xl bg-ghost-500 px-6 py-3 font-semibold text-white transition-all hover:bg-ghost-400 hover:shadow-lg hover:shadow-ghost-500/25 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center rounded-xl
+           bg-bnb-400 px-6 py-3 font-semibold text-black
+           transition-all duration-200
+           hover:bg-bnb-300 hover:shadow-glow
+           active:scale-[0.98]
+           disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-xl border border-gray-700 bg-gray-800 px-6 py-3 font-semibold text-gray-200 transition-all hover:bg-gray-700 hover:border-gray-600;
+    @apply inline-flex items-center justify-center rounded-xl
+           border border-surface-500 bg-surface-300 px-6 py-3
+           font-semibold text-gray-200
+           transition-all duration-200
+           hover:bg-surface-400 hover:border-bnb-400/30 hover:text-white;
   }
 
+  /* ── Inputs ── */
   .input-field {
-    @apply w-full rounded-xl border border-gray-700 bg-gray-800/50 px-4 py-3 text-gray-100 placeholder-gray-500 outline-none transition-colors focus:border-ghost-500 focus:ring-1 focus:ring-ghost-500;
+    @apply w-full rounded-xl border border-surface-500 bg-surface-200 px-4 py-3
+           text-gray-100 placeholder-gray-600 outline-none
+           transition-all duration-200
+           focus:border-bnb-400 focus:ring-1 focus:ring-bnb-400/40
+           focus:shadow-glow-sm;
   }
 
   .label {
     @apply block text-sm font-medium text-gray-400 mb-2;
   }
 
+  /* ── Accent text ── */
   .gradient-text {
-    @apply bg-gradient-to-r from-ghost-400 to-emerald-400 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-bnb-400 to-bnb-200 bg-clip-text text-transparent;
+  }
+
+  .text-accent {
+    @apply text-bnb-400;
+  }
+
+  /* ── Info/status panels ── */
+  .panel-info {
+    @apply rounded-xl border border-bnb-400/20 bg-bnb-400/5 p-4;
+  }
+
+  .panel-error {
+    @apply rounded-xl border border-red-500/20 bg-red-500/10 p-4;
+  }
+
+  .panel-warning {
+    @apply rounded-xl border border-amber-500/20 bg-amber-500/10 p-4;
+  }
+
+  .panel-success {
+    @apply rounded-xl border border-bnb-400/20 bg-bnb-400/10 p-4;
+  }
+
+  /* ── Section heading rhythm ── */
+  .section-title {
+    @apply text-3xl sm:text-4xl font-bold text-center mb-4;
+  }
+
+  .section-subtitle {
+    @apply text-gray-500 text-center max-w-2xl mx-auto mb-12;
   }
 }

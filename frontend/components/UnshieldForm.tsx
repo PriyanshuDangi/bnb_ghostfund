@@ -32,7 +32,6 @@ export function UnshieldForm() {
       try {
         const parsed = JSON.parse(stored);
         setWalletId(parsed.id);
-        // Re-register wallet on the backend (handles backend restarts)
         if (parsed.mnemonic) {
           createWallet(parsed.mnemonic).catch(() => {});
         }
@@ -74,8 +73,9 @@ export function UnshieldForm() {
 
   return (
     <div className="space-y-6">
+      {/* No wallet warning */}
       {!walletId && (
-        <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4">
+        <div className="panel-warning">
           <p className="text-sm text-amber-400">
             No wallet found. Please shield BNB first to create a private
             wallet.
@@ -83,6 +83,7 @@ export function UnshieldForm() {
         </div>
       )}
 
+      {/* Destination address */}
       <div>
         <label htmlFor="dest-address" className="label">
           Destination Address
@@ -96,11 +97,12 @@ export function UnshieldForm() {
           className="input-field font-mono text-sm"
           disabled={loading}
         />
-        <p className="text-xs text-gray-500 mt-2">
+        <p className="text-xs text-gray-600 mt-2">
           This can be a brand new wallet with zero BNB — the relayer pays gas
         </p>
       </div>
 
+      {/* Amount */}
       <div>
         <label htmlFor="unshield-amount" className="label">
           Amount (BNB)
@@ -118,65 +120,67 @@ export function UnshieldForm() {
         />
       </div>
 
+      {/* Fee breakdown */}
       {amount && parseFloat(amount) > 0 && fees && (
-        <div className="rounded-xl bg-gray-800/30 border border-gray-700/50 p-4 space-y-2">
+        <div className="card-flat space-y-2 animate-fade-in">
           <div className="flex justify-between text-sm">
-            <span className="text-gray-400">Unshield amount</span>
+            <span className="text-gray-500">Unshield amount</span>
             <span className="text-gray-200">{amount} BNB</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-gray-400">
+            <span className="text-gray-500">
               Railgun fee ({fees.railgunUnshieldFeePercent})
             </span>
-            <span className="text-gray-400">
+            <span className="text-gray-500">
               -{(parseFloat(amount) * 0.0025).toFixed(6)} BNB
             </span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-gray-400">
+            <span className="text-gray-500">
               Relayer fee ({fees.relayerFeePercent})
             </span>
-            <span className="text-gray-400">
+            <span className="text-gray-500">
               -{(parseFloat(amount) * 0.003).toFixed(6)} BNB
             </span>
           </div>
-          <div className="border-t border-gray-700 pt-2 flex justify-between text-sm font-semibold">
+          <div className="border-t border-surface-400/40 pt-2 flex justify-between text-sm font-semibold">
             <span className="text-gray-300">Destination receives</span>
-            <span className="text-ghost-400">
+            <span className="text-bnb-400">
               ~{(parseFloat(amount) * 0.9945).toFixed(6)} BNB
             </span>
           </div>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-600">
             Gas is paid by the GhostFund relayer — destination needs zero BNB
           </p>
         </div>
       )}
 
+      {/* GhostPaymaster info */}
       {paymaster && (
-        <div className="rounded-xl bg-gray-800/30 border border-ghost-500/20 p-4 space-y-2">
+        <div className="card-flat space-y-2 border-bnb-400/15 animate-fade-in">
           <div className="flex items-center gap-2 mb-1">
-            <div className="h-2 w-2 rounded-full bg-ghost-400 animate-pulse" />
-            <span className="text-xs font-semibold text-ghost-400 uppercase tracking-wider">
+            <div className="h-2 w-2 rounded-full bg-bnb-400 animate-pulse-glow" />
+            <span className="text-xs font-semibold text-bnb-400 uppercase tracking-wider">
               GhostPaymaster
             </span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-gray-400">Contract</span>
+            <span className="text-gray-500">Contract</span>
             <a
               href={`https://testnet.bscscan.com/address/${paymaster.address}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-ghost-400 hover:text-ghost-300 font-mono text-xs"
+              className="text-bnb-400 hover:text-bnb-300 font-mono text-xs transition-colors duration-200"
             >
               {paymaster.address.slice(0, 6)}...{paymaster.address.slice(-4)}
             </a>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-gray-400">On-chain fee rate</span>
+            <span className="text-gray-500">On-chain fee rate</span>
             <span className="text-gray-200">{paymaster.feePercent}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-gray-400">Gas reimbursement pool</span>
+            <span className="text-gray-500">Gas reimbursement pool</span>
             <span className="text-gray-200">
               {parseFloat(paymaster.poolBalanceBNB).toFixed(4)} BNB
             </span>
@@ -184,6 +188,7 @@ export function UnshieldForm() {
         </div>
       )}
 
+      {/* Submit */}
       <button
         onClick={handleUnshield}
         disabled={!walletId || !isValidAddress || !amount || loading}
@@ -192,28 +197,31 @@ export function UnshieldForm() {
         {loading ? proofProgress || 'Processing...' : 'Unshield BNB'}
       </button>
 
+      {/* ZK proof progress */}
       {loading && (
-        <div className="flex items-center gap-3 rounded-xl border border-ghost-500/20 bg-ghost-500/5 p-4">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-ghost-500 border-t-transparent" />
-          <p className="text-sm text-ghost-400">{proofProgress}</p>
+        <div className="flex items-center gap-3 panel-info animate-fade-in">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-bnb-400 border-t-transparent" />
+          <p className="text-sm text-bnb-400">{proofProgress}</p>
         </div>
       )}
 
+      {/* Error */}
       {error && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4">
+        <div className="panel-error">
           <p className="text-sm text-red-400">{error}</p>
         </div>
       )}
 
+      {/* Result */}
       {result && (
-        <div className="space-y-4">
+        <div className="space-y-4 animate-fade-in">
           <TxStatus
             txHash={result.txHash}
             status="confirmed"
             bscscanUrl={result.bscscanUrl}
           />
-          <div className="rounded-xl border border-ghost-500/20 bg-ghost-500/10 p-4">
-            <p className="text-sm text-ghost-400 font-semibold">
+          <div className="panel-success">
+            <p className="text-sm text-bnb-400 font-semibold">
               No on-chain link between your source and destination wallets!
             </p>
             <p className="text-xs text-gray-500 mt-1">

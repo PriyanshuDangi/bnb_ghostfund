@@ -43,7 +43,6 @@ export function ShieldForm() {
       try {
         const parsed = JSON.parse(stored);
         setWalletInfo(parsed);
-        // Re-register wallet on the backend (handles backend restarts)
         if (parsed.mnemonic) {
           createWallet(parsed.mnemonic).catch(() => {});
         }
@@ -79,7 +78,6 @@ export function ShieldForm() {
       const wallet = await initWallet();
       if (!wallet) return;
 
-      // Get and sign the shield signature message
       const { message } = await getShieldSignatureMessage();
       const shieldPrivateKey = await signMessageAsync({ message });
 
@@ -104,17 +102,19 @@ export function ShieldForm() {
 
   return (
     <div className="space-y-6">
+      {/* Private address display */}
       {walletInfo && (
-        <div className="rounded-xl bg-gray-800/50 border border-gray-700 p-4">
-          <p className="text-xs text-gray-500 mb-1">
+        <div className="card-flat">
+          <p className="text-xs text-gray-600 mb-1.5 uppercase tracking-wider font-medium">
             Your private 0zk address
           </p>
-          <p className="text-sm font-mono text-ghost-400 break-all">
+          <p className="text-sm font-mono text-bnb-400 break-all leading-relaxed">
             {walletInfo.railgunAddress}
           </p>
         </div>
       )}
 
+      {/* Amount input */}
       <div>
         <label htmlFor="shield-amount" className="label">
           Amount (BNB)
@@ -130,33 +130,35 @@ export function ShieldForm() {
           className="input-field"
           disabled={loading || isSending}
         />
-        <p className="text-xs text-gray-500 mt-2">
+        <p className="text-xs text-gray-600 mt-2">
           Shield fee: 0.25% &middot; Your BNB will be wrapped to WBNB and
           deposited into the privacy pool
         </p>
       </div>
 
+      {/* Fee breakdown */}
       {amount && parseFloat(amount) > 0 && (
-        <div className="rounded-xl bg-gray-800/30 border border-gray-700/50 p-4 space-y-2">
+        <div className="card-flat space-y-2 animate-fade-in">
           <div className="flex justify-between text-sm">
-            <span className="text-gray-400">You send</span>
+            <span className="text-gray-500">You send</span>
             <span className="text-gray-200">{amount} BNB</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-gray-400">Shield fee (0.25%)</span>
-            <span className="text-gray-400">
+            <span className="text-gray-500">Shield fee (0.25%)</span>
+            <span className="text-gray-500">
               -{(parseFloat(amount) * 0.0025).toFixed(6)} BNB
             </span>
           </div>
-          <div className="border-t border-gray-700 pt-2 flex justify-between text-sm font-semibold">
+          <div className="border-t border-surface-400/40 pt-2 flex justify-between text-sm font-semibold">
             <span className="text-gray-300">Private balance</span>
-            <span className="text-ghost-400">
+            <span className="text-bnb-400">
               ~{(parseFloat(amount) * 0.9975).toFixed(6)} BNB
             </span>
           </div>
         </div>
       )}
 
+      {/* Submit */}
       <button
         onClick={handleShield}
         disabled={
@@ -173,12 +175,14 @@ export function ShieldForm() {
               : 'Shield BNB'}
       </button>
 
+      {/* Error */}
       {error && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4">
+        <div className="panel-error">
           <p className="text-sm text-red-400">{error}</p>
         </div>
       )}
 
+      {/* Tx status */}
       {txHash && (
         <TxStatus
           txHash={txHash}
@@ -186,9 +190,10 @@ export function ShieldForm() {
         />
       )}
 
+      {/* Success message */}
       {isConfirmed && (
-        <div className="rounded-xl border border-ghost-500/20 bg-ghost-500/10 p-4">
-          <p className="text-sm text-ghost-400 font-semibold">
+        <div className="panel-success animate-fade-in">
+          <p className="text-sm text-bnb-400 font-semibold">
             Your BNB is now private. No one can see your shielded balance.
           </p>
           <p className="text-xs text-gray-500 mt-1">
