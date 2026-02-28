@@ -6,6 +6,10 @@ GhostFund lets users send BNB from Wallet A to Wallet B with **zero on-chain con
 
 > Built for the BNB Chain Hackathon. All contracts are **deployed and live** on BSC Testnet.
 
+### Demo
+
+https://www.loom.com/share/155109f75853491b805150cf947c63fa
+
 ---
 
 ## How It Works
